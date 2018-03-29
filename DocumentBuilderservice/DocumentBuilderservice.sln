@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentBuilderservice", "DocumentBuilderservice\DocumentBuilderservice.csproj", "{19FBA9BF-7F04-4527-9189-ACAE97D51884}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentBuilderService.Test", "DocumentBuilderService.Test\DocumentBuilderService.Test.csproj", "{30DEB82B-2A0C-482E-96EA-67DB51E954EB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{19FBA9BF-7F04-4527-9189-ACAE97D51884}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19FBA9BF-7F04-4527-9189-ACAE97D51884}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19FBA9BF-7F04-4527-9189-ACAE97D51884}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19FBA9BF-7F04-4527-9189-ACAE97D51884}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30DEB82B-2A0C-482E-96EA-67DB51E954EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30DEB82B-2A0C-482E-96EA-67DB51E954EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30DEB82B-2A0C-482E-96EA-67DB51E954EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30DEB82B-2A0C-482E-96EA-67DB51E954EB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9AD78276-BCA2-4495-9735-5F1249478A24}
+	EndGlobalSection
+EndGlobal
