@@ -9,6 +9,8 @@
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using QueueServer;
+
     [TestClass]
     public class TestService
     {
@@ -18,6 +20,7 @@
         private string _outDir;
         private string _inDir;
 
+        private QueueServer _queueserver;
         private string _outFile1;
         private string _outFile2;
         private string _outFile3;
@@ -30,7 +33,8 @@
             _currentDir = Directory.GetCurrentDirectory();
             _outDir = _currentDir;
             _badFilesDir = _currentDir;
-            _fileService = new FileService(_inDir, _outDir, _badFilesDir, new PdfDocumentBuilder());
+            _queueserver = new QueueServer(_outDir);
+            _fileService = new FileService(_inDir, _outDir, _badFilesDir, new PdfDocumentBuilder(), "TestService");
 
             using (var client = new WebClient())
             {
@@ -121,6 +125,28 @@
             Assert.IsFalse(File.Exists(Path.Combine(_badFilesDir + "Image_003.jpg")));
             Assert.IsFalse(File.Exists(_outFile1));
             Assert.IsTrue(File.Exists(_outFile2));
+        }
+
+        [TestMethod]
+        public void TestAzureFileSend()
+        {
+            _queueserver.Start();
+            _fileService.Start();
+            Thread.Sleep(17000);
+            _fileService.Stop();
+            var ourfile1 = Path.Combine(_outDir + @"\AzureDocument0.pdf");
+            var ourfile2 = Path.Combine(_outDir + @"\AzureDocument1.pdf");
+            Assert.IsTrue(File.Exists(ourfile1));
+            Assert.IsTrue(File.Exists(ourfile2));
+        }
+
+        [TestMethod]
+        public void TestAzureBroadcastMessage()
+        {
+            _queueserver.Start();
+            _fileService.Start();
+            _queueserver.SendBroadcastMessage("Update Status", null);
+            Thread.Sleep(17000);
         }
 
         private void DeleteOutFiles()

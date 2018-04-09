@@ -40,12 +40,12 @@
 
             var logFactory = new LogFactory(conf);
             LogManager.Configuration = conf;
-
+            var serviceName = "DocumentBulider";
             HostFactory.Run(
                       hostConf => hostConf.Service<FileService>(
                           s =>
                           {
-                              s.ConstructUsing(() => new FileService(@"C:\MP.ServicesInDir", @"C:\MP.ServisesOutDir", @"C:\MP.ServisesBadSequencesDir", new PdfDocumentBuilder()));
+                              s.ConstructUsing(() => new FileService(@"C:\MP.ServicesInDir", @"C:\MP.ServisesOutDir", @"C:\MP.ServisesBadSequencesDir", new PdfDocumentBuilder(), serviceName));
                               s.WhenStarted(serv => serv.Start());
                               s.WhenStopped(serv => serv.Stop());
                         }).UseNLog(logFactory));

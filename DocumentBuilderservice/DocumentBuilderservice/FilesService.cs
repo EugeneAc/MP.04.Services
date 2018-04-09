@@ -15,30 +15,41 @@
     {
         private ManualResetEvent _stopWorkEvent;
         private Task _workTask;
+        private Task _sendStatusTask;
+        private Task _changeSettingsTask;
         private string _searchDir;
         private string _outDir;
         private string _badFilesDir;
         private PdfDocumentBuilder _documentBuilder;
         private Logger _logger;
 
-        public FileService(string searchDir, PdfDocumentBuilder documentBuilder) 
+        private string _currentStatus;
+        private string _serviceName;
+
+        private AzureQueueClient _azureQueueClient;
+
+        public int _newFileWaitTimeout { get; private set; }
+
+        public FileService(string searchDir, PdfDocumentBuilder documentBuilder, string uniqueServiceName)
             : this(
                 searchDir,
                 Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName),
-                documentBuilder)
+                documentBuilder,
+                uniqueServiceName)
         {
         }
 
-        public FileService(string searchDir, string outDir, PdfDocumentBuilder documentBuilder)
+        public FileService(string searchDir, string outDir, PdfDocumentBuilder documentBuilder, string uniqueServiceName)
             : this(
                 searchDir,
                 outDir,
                 Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName),
-                documentBuilder)
+                documentBuilder,
+                uniqueServiceName)
         {
         }
 
-        public FileService(string searchDir, string outDir, string badFilesDir, PdfDocumentBuilder documentBuilder)
+        public FileService(string searchDir, string outDir, string badFilesDir, PdfDocumentBuilder documentBuilder, string uniqueServiceName)
         {
             _searchDir = searchDir;
             _documentBuilder = documentBuilder;
@@ -46,17 +57,23 @@
             _badFilesDir = badFilesDir;
             _logger = LogManager.GetCurrentClassLogger();
             if (!Directory.Exists(_searchDir))
-            { 
+            {
                 Directory.CreateDirectory(_searchDir);
             }
 
             _stopWorkEvent = new ManualResetEvent(false);
+            _newFileWaitTimeout = 1000;
+            _serviceName = uniqueServiceName;
+            _azureQueueClient = new AzureQueueClient(_serviceName);
         }
 
         public void Start()
         {
             _workTask = Task.Factory.StartNew(WorkTask);
+            _changeSettingsTask = Task.Factory.StartNew(SettingsChangeTask);
+            _sendStatusTask = Task.Factory.StartNew(SendCurrentStatus);
             _logger.Trace("Started");
+            _azureQueueClient.SendStatusMessage(_serviceName + " Service started");
         }
 
         public void Stop()
@@ -65,6 +82,38 @@
             _stopWorkEvent.Set();
             _workTask.Wait();
             _logger.Trace("Stopped");
+            _azureQueueClient.SendStatusMessage(_serviceName + " Service Stopped");
+        }
+
+        private void SendCurrentStatus()
+        {
+            while (!_stopWorkEvent.WaitOne(TimeSpan.Zero))
+            {
+                _azureQueueClient.SendStatusMessage(_currentStatus);
+                Thread.Sleep(60000);
+            }
+        }
+
+        private void SettingsChangeTask()
+        {
+            while (!_stopWorkEvent.WaitOne(TimeSpan.Zero))
+            {
+                var settings = _azureQueueClient.ReceiveNewSettings();
+                foreach (var set in settings)
+                {
+                    if (set.Key == "Timeout")
+                    {
+                        _newFileWaitTimeout = set.Value;
+                    }
+
+                    if ((set.Key == "StatusUpdate") && (set.Value == 1))
+                    {
+                        _azureQueueClient.SendStatusMessage(_currentStatus);
+                    }
+                }
+
+                Thread.Sleep(100);
+            }
         }
 
         private void WorkTask()
@@ -75,6 +124,7 @@
                 var sequence = GetFileSequence();
                 if (sequence.Count > 0)
                 {
+                    _currentStatus = _serviceName + " Processing new files";
                     if (!Directory.Exists(_outDir))
                     {
                         Directory.CreateDirectory(_outDir);
@@ -83,9 +133,9 @@
                     try
                     {
                         var doucument = _documentBuilder.BuildDocument(sequence);
-                        _documentBuilder.SaveFile(
-                            doucument,
-                            Path.Combine(_outDir + @"\" + "Document" + outputCounter + ".pdf"));
+                        var filePath = Path.Combine(_outDir + @"\" + "Document" + outputCounter + ".pdf");
+                        _documentBuilder.SaveFile(doucument, filePath);
+                        _azureQueueClient.SendFile(filePath);
                     }
                     catch (Exception)
                     {
@@ -114,6 +164,7 @@
                     outputCounter++;
                 }
 
+                _currentStatus = _serviceName + " Idle" + @" Current Settings: {Timeout=" + _newFileWaitTimeout + "}";
                 Thread.Sleep(1000);
             }
         }
@@ -141,6 +192,7 @@
                     }
                 }
 
+                Thread.Sleep(_newFileWaitTimeout);
                 trycount++;
             }
 
