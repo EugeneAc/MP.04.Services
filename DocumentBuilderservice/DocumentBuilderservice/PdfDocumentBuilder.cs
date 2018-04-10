@@ -22,12 +22,11 @@
             _logger = LogManager.GetCurrentClassLogger();
             var document = new Document();
             var section = document.AddSection();
-
             for (int i = 0; i < files.Count(); i++)
             {
                 if (TryOpen(files[i], 3))
                 {
-                    var img = section.AddImage(files.ToArray()[i]);
+                    var img = section.AddImage(files[i]);
                     img.LockAspectRatio = true;
                     img.Left = -70;
                     if (img.Height > img.Width)
@@ -45,7 +44,7 @@
                     }
                 }
                 else
-                { 
+                {
                     files.Remove(files[i]);
                 }
             }
@@ -58,7 +57,7 @@
             }
             catch (Exception e)
             {
-                _logger.Error("Message: " + e.Message + " Inner: " + e.InnerException);
+                _logger.Error(e.ToString());
 
                 throw;
             }
@@ -87,7 +86,7 @@
                 catch (IOException e)
                 {
                     Thread.Sleep(1000);
-                    _logger.Error("Message: " + e.Message + " Inner: " + e.InnerException);
+                    _logger.Error(e.ToString());
                 }
             }
 
