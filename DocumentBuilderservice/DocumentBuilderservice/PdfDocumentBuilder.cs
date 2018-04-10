@@ -17,17 +17,17 @@
     {
         private Logger _logger;
 
-        public PdfDocument BuildDocument(IEnumerable<string> files)
+        public PdfDocument BuildDocument(List<string> files)
         {
             _logger = LogManager.GetCurrentClassLogger();
             var document = new Document();
             var section = document.AddSection();
-            var iterList = files.ToList();
-            for (int i = 0; i < iterList.Count(); i++)
+
+            for (int i = 0; i < files.Count(); i++)
             {
-                if (TryOpen(iterList[i], 3))
+                if (TryOpen(files[i], 3))
                 {
-                    var img = section.AddImage(iterList[i]);
+                    var img = section.AddImage(files[i]);
                     img.LockAspectRatio = true;
                     img.Left = -70;
                     if (img.Height > img.Width)
@@ -45,8 +45,8 @@
                     }
                 }
                 else
-                { 
-                    iterList.Remove(iterList[i]);
+                {
+                    files.Remove(files[i]);
                 }
             }
 
