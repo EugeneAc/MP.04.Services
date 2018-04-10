@@ -64,7 +64,7 @@
     </Reference>
     <Reference Include="QueueServer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\05. Message Queues\Task3\Task\QueueServer\QueueServer\bin\Debug\QueueServer.exe</HintPath>
+      <HintPath>..\QueueServer.exe</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
