@@ -17,17 +17,17 @@
     {
         private Logger _logger;
 
-        public PdfDocument BuildDocument(List<string> files)
+        public PdfDocument BuildDocument(IEnumerable<string> files)
         {
             _logger = LogManager.GetCurrentClassLogger();
             var document = new Document();
             var section = document.AddSection();
-
-            for (int i = 0; i < files.Count(); i++)
+            var iterList = files.ToList();
+            for (int i = 0; i < iterList.Count(); i++)
             {
-                if (TryOpen(files[i], 3))
+                if (TryOpen(iterList[i], 3))
                 {
-                    var img = section.AddImage(files.ToArray()[i]);
+                    var img = section.AddImage(iterList[i]);
                     img.LockAspectRatio = true;
                     img.Left = -70;
                     if (img.Height > img.Width)
@@ -46,7 +46,7 @@
                 }
                 else
                 { 
-                    files.Remove(files[i]);
+                    iterList.Remove(iterList[i]);
                 }
             }
 
@@ -58,7 +58,7 @@
             }
             catch (Exception e)
             {
-                _logger.Error("Message: " + e.Message + " Inner: " + e.InnerException);
+                _logger.Error(e.ToString());
 
                 throw;
             }

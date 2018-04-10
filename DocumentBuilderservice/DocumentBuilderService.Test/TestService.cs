@@ -122,7 +122,8 @@
             _fileService.Start();
             Thread.Sleep(10000);
             _fileService.Stop();
-            Assert.IsFalse(File.Exists(Path.Combine(_badFilesDir + "Image_003.jpg")));
+            var badFile = Path.Combine(_badFilesDir + "Image_003.jpg");
+            Assert.IsFalse(File.Exists(badFile));
             Assert.IsFalse(File.Exists(_outFile1));
             Assert.IsTrue(File.Exists(_outFile2));
         }
